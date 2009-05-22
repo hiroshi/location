@@ -1,0 +1,33 @@
+<style>
+        div.auto_complete {
+          width: 350px;
+          background: #fff;
+        }
+        div.auto_complete ul {
+          border:1px solid #888;
+          margin:0;
+          padding:0;
+          width:100%;
+          list-style-type:none;
+        }
+        div.auto_complete ul li {
+          margin:0;
+          padding:3px;
+        }
+        div.auto_complete ul li.selected {
+          background-color: #ffb;
+        }
+        div.auto_complete ul strong.highlight {
+          color: #800; 
+          margin:0;
+          padding:0;
+        }
+</style>
+
+<div>
+  <%= label_tag "city", "City name:" %>
+  <%= text_field_tag "city" %>
+  <div id="city_auto_complete" class="auto_complete"></div>
+  <%= auto_complete_field "city", :url => complete_city_path %>
+  from <%= number_with_delimiter City.count %> cities in the world.
+</div>

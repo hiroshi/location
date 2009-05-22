@@ -1,0 +1,5 @@
+
+
+== log
+script/plugin install git://github.com/kurowski/auto_complete.git
+(git://github.com/rails/auto_complete.git doesn't attend CSRF problem)
