@@ -10,18 +10,35 @@ task :worldcities => :environment do
       puts reader.readline # dispose the header line
       #csv = CSV::IOReader.new(reader)
       conn = City.connection
-      reader.each do |line|
-        begin
-          country, city, accentcity, region, population, latitude, longitude = CSV.parse_line(line).map do |e|
-            e ? Iconv.iconv("UTF-8", "ISO-8859-1", e.gsub(/'/,"''")) : "NULL"
+      columns = "(country_code, name, region_code, latitude, longitude)"
+
+      until reader.eof? do
+        # NOTE: Bulk insert of 20 items is almost 16x firster than single insert
+        values_list = (0..20).map{ reader.gets}.compact.map do |line|
+          begin
+            country, city, accentcity, region, population, latitude, longitude = CSV.parse_line(line).map do |e|
+              e ? Iconv.iconv("UTF-8", "ISO-8859-1", e.gsub(/'/,"''")) : "NULL"
+            end
+          rescue CSV::IllegalFormatError => e
+            puts e.message
+            puts line
           end
-          conn.insert("INSERT INTO cities (country_code, name, region_code, latitude, longitude) VALUES ('#{country}', '#{city}', '#{region}', #{latitude || 'NULL'}, #{longitude or 'NULL'})")
-        rescue CSV::IllegalFormatError => e
-          puts e.message
-          puts line
-        # rescue SQLite3::SQLException => e # add your adapter's exception # NOTE: 
+          "('#{country}', '#{city}', '#{region}', #{latitude || 'NULL'}, #{longitude or 'NULL'})"
+        end
+
+        begin
+          # Try bulk insert
+          conn.execute("INSERT INTO cities #{columns} VALUES #{values_list.join(", ")}")
+          # rescue SQLite3::SQLException => e # add your adapter's exception # NOTE: 
         rescue => e # add your adapter's exception
-          puts e.message
+          # if failed insert indivisualy
+          values_list.each do |values|
+            begin
+              conn.execute("INSERT INTO cities #{columns} VALUES #{values}")
+            rescue => e
+              puts e.message
+            end
+          end
         end
       end
     end
