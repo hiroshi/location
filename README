@@ -1,11 +1,15 @@
 
 == Setup instruction
-Run migratino.
+Run migration.
  rake db:migrate
 
 Insert city data.
  rake worldcities
 
 == Installed plugins
-script/plugin install git://github.com/kurowski/auto_complete.git
+Auto complete
+ script/plugin install git://github.com/kurowski/auto_complete.git
 (git://github.com/rails/auto_complete.git doesn't attend CSRF problem)
+
+Passenger deploy
+ script/plugin install git://github.com/hiroshi/passenger_deploy.git
