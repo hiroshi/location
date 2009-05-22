@@ -7,7 +7,8 @@ class CreateInitialSchema < ActiveRecord::Migration
       t.float :longitude
       t.float :latitude
     end
-    add_index :cities, [:name, :country_code, :region_code], :unique => true
+    # NOTE: worldcities data contains cities those who has same name, contry and region. Can't be treated as unique key.
+    # add_index :cities, [:name, :country_code, :region_code], :unique => true
 
     create_table :countries do |t|
       t.string :name
