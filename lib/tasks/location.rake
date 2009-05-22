@@ -2,6 +2,7 @@ desc "import cities from worldcitiespop.txt.gz. FILE=path/to/file"
 task :worldcities => :environment do
   require "zlib"
   require "csv"
+  require "iconv"
   path = "db/worldcitiespop.txt.gz"
 
   begin
@@ -11,12 +12,15 @@ task :worldcities => :environment do
       conn = City.connection
       reader.each do |line|
         begin
-          country, city, accentcity, region, population, latitude, longitude = CSV.parse_line(line)
-          conn.insert("INSERT INTO cities (country_code, name, region_code, latitude, longitude) VALUES (\"#{country}\", \"#{city}\", \"#{region}\", \"#{latitude}\", \"#{longitude}\")")
+          country, city, accentcity, region, population, latitude, longitude = CSV.parse_line(line).map do |e|
+            e ? Iconv.iconv("UTF-8", "ISO-8859-1", e.gsub(/'/,"''")) : "NULL"
+          end
+          conn.insert("INSERT INTO cities (country_code, name, region_code, latitude, longitude) VALUES ('#{country}', '#{city}', '#{region}', #{latitude || 'NULL'}, #{longitude or 'NULL'})")
         rescue CSV::IllegalFormatError => e
           puts e.message
           puts line
-        rescue SQLite3::SQLException => e # add your adapter's exception
+        # rescue SQLite3::SQLException => e # add your adapter's exception # NOTE: 
+        rescue => e # add your adapter's exception
           puts e.message
         end
       end
