@@ -1,5 +1,11 @@
 
+== Setup instruction
+Run migratino.
+ rake db:migrate
 
-== log
+Insert city data.
+ rake worldcities
+
+== Installed plugins
 script/plugin install git://github.com/kurowski/auto_complete.git
 (git://github.com/rails/auto_complete.git doesn't attend CSRF problem)
