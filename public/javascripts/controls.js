@@ -64,6 +64,7 @@ Autocompleter.Base = Class.create({
         if(!update.style.position || update.style.position=='absolute') {
           update.style.position = 'absolute';
           Position.clone(element, update, {
+            setWidth: false, // Added by hiroshi
             setHeight: false,
             offsetTop: element.offsetHeight
           });
