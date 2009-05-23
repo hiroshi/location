@@ -50,13 +50,30 @@ namespace :location do
     end
   end
 
-  desc "import countries data from db/iso3166.csv"
+  desc "import countries from db/iso3166-1.csv"
   task :countries => :environment do
     require "csv"
     conn = Country.connection
-    CSV.open("db/iso3166.csv", "r") do |row|
+    CSV.open("db/iso3166-1.csv", "r") do |row|
       country_code, name = row.map{|e|e.gsub(/'/,"''")}
       conn.insert("INSERT INTO countries (country_code, name) VALUES ('#{country_code.downcase}', '#{name}')")
+    end
+  end
+
+  desc "import regions from db/iso3166-2.csv and db/fips10-4.csv"
+  task :regions => :environment do
+    require "csv"
+    conn = Region.connection
+    def conn.insert_region(row)
+      country_code, region_code, name = row.map{|e|e.gsub(/'/,"''")}
+      self.insert("INSERT INTO regions (country_code, region_code, name) VALUES ('#{country_code.downcase}', '#{region_code.downcase}', '#{name}')")
+    end
+
+    CSV.open("db/iso3166-2.csv", "r") do |row|
+      conn.insert_region(row)
+    end
+    CSV.open("db/fips10-4.csv", "r") do |row|
+      conn.insert_region(row)
     end
   end
 end

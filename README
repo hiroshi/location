@@ -3,8 +3,22 @@
 Run migration.
  rake db:migrate
 
-Insert city data.
+Insert city data. (It can take hours)
  rake worldcities
+
+== About data used
+worldcities (cities)
+  Download from http://www.maxmind.com/app/worldcities
+
+iso3166-1.csv (countries)
+  copy form http://www.maxmind.com/app/iso3166 by hand.
+
+iso3166-2.csv (regions)
+  copy from http://www.maxmind.com/app/iso3166_2 by hand.
+
+fips10-4.csv (regions)
+  Download from http://www.maxmind.com/app/fips10_4
+
 
 == Installed plugins
 Auto complete
