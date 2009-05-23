@@ -8,9 +8,14 @@ class ApplicationController < ActionController::Base
   end
 
   def complete_city
-    # @items = [{:name => "Tokyo"},{:name => "Osaka"}]
     @phrase = params[:city]
-    @items = City.all(:conditions => ["name LIKE ?", "%#{@phrase}%"], :limit => 10)
-    render :inline => "<%= auto_complete_result @items, :name, @phrase %>"
+    @cities = City.all(:select => "cities.name, co.name AS country_name", :joins => "LEFT JOIN countries co ON cities.country_code = co.country_code", :conditions => ["cities.name LIKE ?", "%#{@phrase}%"], :limit => 10)
+    render :inline => <<-INLINE
+      <ul>
+      <% @cities.each do |city| %>
+        <li><%= highlight(city.name, @phrase) %>, <%= city.country_name %></li>
+      <% end %>
+      </ul>
+    INLINE
   end
 end
