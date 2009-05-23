@@ -23,7 +23,7 @@ production:
   adapter: postgresql
   encoding: unicode
   database: location_production
-  username: postgres
+  username: www-data
   password:
   pool: 5
   timeout: 5000
