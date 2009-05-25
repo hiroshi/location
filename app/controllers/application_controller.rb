@@ -15,7 +15,8 @@ class ApplicationController < ActionController::Base
         "LEFT JOIN countries co ON cities.country_code = co.country_code",
         "LEFT JOIN regions r ON cities.country_code = r.country_code AND cities.region_code = r.region_code"
       ].join(" "),
-      :conditions => ["cities.name LIKE ?", "%#{@phrase}%"], 
+      # :conditions => ["cities.name LIKE ?", "%#{@phrase}%"], 
+      :conditions => ["to_tsvector('english', fulltext_keywords) @@ to_tsquery('english', ?)", @phrase.gsub(/\s+/," & ")],
       :limit => 10)
     render :inline => <<-INLINE
       <ul>

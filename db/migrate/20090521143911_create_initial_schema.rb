@@ -6,7 +6,11 @@ class CreateInitialSchema < ActiveRecord::Migration
       t.string :region_code, :limit => 2
       t.float :longitude
       t.float :latitude
+      t.string :fulltext_keywords, :limit => 4096 # TODO: No evidence to be 4096. Maybe not sufficient...
     end
+    # Add full text index
+    execute("CREATE INDEX index_fulltext_on_cities ON cities USING gin(to_tsvector('english', fulltext_keywords))")
+
     # NOTE: worldcities data contains cities those who has same name, contry and region. Can't be treated as unique key.
     # add_index :cities, [:name, :country_code, :region_code], :unique => true
 

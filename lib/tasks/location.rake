@@ -1,6 +1,6 @@
 namespace :location do
   desc "import cities from worldcitiespop.txt.gz. FILE=path/to/file"
-  task :worldcities => :environment do
+  task :cities => :environment do
     require "zlib"
     require "csv"
     require "iconv"
@@ -11,20 +11,33 @@ namespace :location do
         puts reader.readline # dispose the header line
         #csv = CSV::IOReader.new(reader)
         conn = City.connection
-        columns = "(country_code, name, region_code, latitude, longitude)"
+        columns = "(country_code, name, region_code, latitude, longitude, fulltext_keywords)"
 
         until reader.eof? do
           # NOTE: Bulk insert of 20 items is almost 16x firster than single insert
           values_list = (0..20).map{ reader.gets}.compact.map do |line|
             begin
               country, city, accentcity, region, population, latitude, longitude = CSV.parse_line(line).map do |e|
-                e ? Iconv.iconv("UTF-8", "ISO-8859-1", e.gsub(/'/,"''")) : "NULL"
+                Iconv.conv("UTF-8", "ISO-8859-1", e.gsub(/'/,"''"))
               end
             rescue CSV::IllegalFormatError => e
               puts e.message
               puts line
             end
-            "('#{country}', '#{city}', '#{region}', #{latitude || 'NULL'}, #{longitude or 'NULL'})"
+            # "Tokyo" -> "to ok ky yo tok oky kyo toky okyo tokyo"
+            unless city.blank?
+              fulltext_keywords = city.gsub(/''/,"'").split(/[-\s]+/).map do |w|
+                ws = w.split(//)
+                (2 .. ws.length).map do |l|
+                  (0 .. (ws.length - l)).map do |i|
+                    # w[i,l]
+                    ws[i,l].join
+                  end.join(" ")
+                end.join(" ")
+              end.join(" ").gsub(/'/,"''")
+            end
+
+            "('#{country}', '#{city}', '#{region}', #{latitude || 'NULL'}, #{longitude || 'NULL'}, '#{fulltext_keywords}')"
           end
 
           begin
